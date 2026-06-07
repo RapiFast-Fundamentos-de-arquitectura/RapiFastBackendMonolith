@@ -11,6 +11,7 @@ using BackendAwSmartstay.API.IAM.Infrastructure.Extensions;
 using BackendAwSmartstay.API.Profiles.Infrastructure.Interfaces.ASP.Configuration.Extensions;
 using BackendAwSmartstay.API.shared.Infrastructure.Persistence.EFC.Configuration.Extensions;
 using BackendAwSmartstay.API.Analytics.Infrastructure.Interfaces.ASP.Configuration.Extensions;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +46,9 @@ builder.Services.AddHealthChecks()
         name: "mysql-db-check", 
         tags: new[] { "database" });
 
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect("localhost:6379"));
+    
 var app = builder.Build();
 
 app.EnsureDatabaseCreated();
@@ -57,7 +61,7 @@ app.UseCors("AllowFrontend");
 
 app.UseHttpsRedirection();
 
-app.UseRequestAuthorization();
+//app.UseRequestAuthorization();
 
 app.MapControllers();
 

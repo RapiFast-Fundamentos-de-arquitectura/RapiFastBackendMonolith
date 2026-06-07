@@ -7,18 +7,18 @@ using BackendAwSmartstay.API.IAM.Domain.Model.Constants;
 using BackendAwSmartstay.API.IAM.Infrastructure.Pipeline.Middleware.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-
+using StackExchange.Redis;
 namespace BackendAwSmartstay.API.Analytics.Interfaces.REST;
 
 /// <summary>
 /// REST controller for analytics operations.
 /// </summary>
-[Authorize(UserRoles.Admin, UserRoles.ChainAdmin)] // Only Admin/ChainAdmin should access this
+//[Authorize(UserRoles.Admin, UserRoles.ChainAdmin)] // Only Admin/ChainAdmin should access this
 [ApiController]
 [Route("api/v1/[controller]")]
 [Produces(MediaTypeNames.Application.Json)]
 [SwaggerTag("Available Analytics Endpoints")]
-public class AnalyticsController(IAnalyticsQueryService analyticsQueryService) : ControllerBase
+public class AnalyticsController(IAnalyticsQueryService analyticsQueryService, IConnectionMultiplexer redis) : ControllerBase
 {
     /// <summary>
     /// Retrieves monthly performance metrics.
@@ -38,5 +38,27 @@ public class AnalyticsController(IAnalyticsQueryService analyticsQueryService) :
         var metrics = await analyticsQueryService.Handle(query);
         var resource = PerformanceMetricsAssembler.ToResourceFromEntity(metrics);
         return Ok(resource);
+    }
+
+    private readonly IDatabase _db = redis.GetDatabase();
+    
+    [HttpPost("cache")]
+    public async Task<IActionResult> CacheData([FromBody] string message)
+    {
+        await _db.ListRightPushAsync("analytics-messages", message);
+
+        return Ok(new
+        {
+            success = true,
+            saved = message
+        });
+    }
+
+    [HttpGet("cache")]
+    public async Task<IActionResult> GetCache()
+    {
+        var values = await _db.ListRangeAsync("analytics-messages");
+
+        return Ok(values.Select(v => v.ToString()));
     }
 }
