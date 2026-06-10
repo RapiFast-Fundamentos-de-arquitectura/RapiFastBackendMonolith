@@ -1,4 +1,5 @@
 using BackendAwSmartstay.API.IAM.Domain.Model.Aggregates;
+using BackendAwSmartstay.API.IAM.Domain.Model.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace BackendAwSmartstay.API.IAM.Infrastructure.Persistence.EFC.Configuration.Extensions;
@@ -7,17 +8,49 @@ public static class ModelBuilderExtensions
 {
     public static void ApplyIamConfiguration(this ModelBuilder builder)
     {
-        // IAM Context Configuration
-        builder.Entity<User>().ToTable("users"); // Explicit table name
+        builder.Entity<User>().ToTable("users");
+
         builder.Entity<User>().HasKey(u => u.Id);
         builder.Entity<User>().Property(u => u.Id).IsRequired().ValueGeneratedOnAdd();
+
         builder.Entity<User>().Property(u => u.Username).IsRequired().HasMaxLength(100);
         builder.Entity<User>().Property(u => u.PasswordHash).IsRequired().HasMaxLength(255);
-        
-        // --- NEW: ROLE COLUMN ---
+
         builder.Entity<User>().Property(u => u.Role)
             .IsRequired()
             .HasMaxLength(20)
             .HasDefaultValue("guest");
+
+        // --- NEW COLUMNS ---
+        builder.Entity<User>().Property(u => u.Status)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .HasDefaultValue(UserStatus.Active);
+
+        builder.Entity<User>().Property(u => u.HotelId)
+            .HasColumnName("hotel_id")
+            .IsRequired(false);
+
+        builder.Entity<User>().Property(u => u.ChainId)
+            .HasColumnName("chain_id")
+            .IsRequired(false);
+
+        builder.Entity<User>().Property(u => u.TokenVersion)
+            .HasColumnName("token_version")
+            .IsRequired()
+            .HasDefaultValue(0);
+
+        builder.Entity<User>().Property(u => u.CreatedAt)
+            .HasColumnName("created_at")
+            .IsRequired()
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6)")
+            .ValueGeneratedOnAdd();
+
+        builder.Entity<User>().Property(u => u.UpdatedAt)
+            .HasColumnName("updated_at")
+            .IsRequired()
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)")
+            .ValueGeneratedOnAddOrUpdate();
     }
 }
