@@ -3,6 +3,7 @@ using BackendAwSmartstay.API.IAM.Domain.Model.Aggregates;
 using BackendAwSmartstay.API.IAM.Domain.Model.Commands;
 using BackendAwSmartstay.API.IAM.Domain.Model.Constants;
 using BackendAwSmartstay.API.IAM.Domain.Model.Exceptions;
+using BackendAwSmartstay.API.IAM.Domain.Model.ValueObjects;
 using BackendAwSmartstay.API.IAM.Domain.Repositories;
 using BackendAwSmartstay.API.IAM.Domain.Services;
 using BackendAwSmartstay.API.Shared.Domain.Repositories;
@@ -23,7 +24,8 @@ public class UserCommandService(
     /// </summary>
     public async Task<(User user, string token)> Handle(SignInCommand command)
     {
-        var user = await userRepository.FindByUsernameAsync(command.Username);
+        var username = new Username(command.Username);
+        var user = await userRepository.FindByUsernameAsync(username);
         if (user == null || !hashingService.VerifyPassword(command.Password, user.PasswordHash))
         {
             throw new InvalidCredentialsException();
@@ -37,11 +39,12 @@ public class UserCommandService(
     /// </summary>
     public async Task Handle(SignUpCommand command)
     {
-        if (await userRepository.ExistsByUsernameAsync(command.Username))
+        var username = new Username(command.Username);
+        if (await userRepository.ExistsByUsernameAsync(username))
             throw new UsernameAlreadyExistsException(command.Username);
 
         var hashedPassword = hashingService.HashPassword(command.Password);
-        var user = new User(command.Username, hashedPassword, UserRoles.Guest);
+        var user = new User(username, hashedPassword, UserRoles.Guest);
 
         await userRepository.AddAsync(user);
         await unitOfWork.CompleteAsync();

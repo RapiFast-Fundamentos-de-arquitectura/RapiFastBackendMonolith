@@ -1,5 +1,6 @@
 using BackendAwSmartstay.API.IAM.Domain.Model.Aggregates;
 using BackendAwSmartstay.API.IAM.Domain.Model.Queries;
+using BackendAwSmartstay.API.IAM.Domain.Model.ValueObjects;
 using BackendAwSmartstay.API.IAM.Domain.Repositories;
 using BackendAwSmartstay.API.IAM.Domain.Services;
 
@@ -40,6 +41,7 @@ public class UserQueryService(IUserRepository userRepository) : IUserQueryServic
     /// <returns>The user</returns>
     public async Task<User?> Handle(GetUserByUsernameQuery query)
     {
-        return await userRepository.FindByUsernameAsync(query.Username);
+        var username = new Username(query.Username);
+        return await userRepository.FindByUsernameAsync(username);
     }
 }

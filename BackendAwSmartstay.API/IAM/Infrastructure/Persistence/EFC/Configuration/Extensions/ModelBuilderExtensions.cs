@@ -1,5 +1,6 @@
 using BackendAwSmartstay.API.IAM.Domain.Model.Aggregates;
 using BackendAwSmartstay.API.IAM.Domain.Model.Enums;
+using BackendAwSmartstay.API.IAM.Domain.Model.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace BackendAwSmartstay.API.IAM.Infrastructure.Persistence.EFC.Configuration.Extensions;
@@ -13,15 +14,19 @@ public static class ModelBuilderExtensions
         builder.Entity<User>().HasKey(u => u.Id);
         builder.Entity<User>().Property(u => u.Id).IsRequired().ValueGeneratedOnAdd();
 
-        builder.Entity<User>().Property(u => u.Username).IsRequired().HasMaxLength(100);
+        builder.Entity<User>().Property(u => u.Username)
+            .IsRequired()
+            .HasMaxLength(100)
+            .HasConversion(v => v.Value, v => new Username(v));
+
         builder.Entity<User>().Property(u => u.PasswordHash).IsRequired().HasMaxLength(255);
 
         builder.Entity<User>().Property(u => u.Role)
             .IsRequired()
             .HasMaxLength(20)
-            .HasDefaultValue("guest");
+            .HasDefaultValue("guest")
+            .HasConversion(v => v.Value, v => new Role(v));
 
-        // --- NEW COLUMNS ---
         builder.Entity<User>().Property(u => u.Status)
             .IsRequired()
             .HasConversion<string>()
