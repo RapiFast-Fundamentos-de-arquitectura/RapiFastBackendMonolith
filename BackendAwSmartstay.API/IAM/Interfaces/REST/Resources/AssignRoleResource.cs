@@ -7,4 +7,5 @@ namespace BackendAwSmartstay.API.IAM.Interfaces.REST.Resources;
 /// </summary>
 public record AssignRoleResource(
     [Required] int TargetUserId,
-    [Required] string NewRole);
+    [Required] string NewRole
+);
