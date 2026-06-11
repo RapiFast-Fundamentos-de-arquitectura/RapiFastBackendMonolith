@@ -24,7 +24,6 @@ public static class ModelBuilderExtensions
         builder.Entity<User>().Property(u => u.Role)
             .IsRequired()
             .HasMaxLength(20)
-            .HasDefaultValue("guest")
             .HasConversion(v => v.Value, v => new Role(v));
 
         builder.Entity<User>().Property(u => u.Status)
