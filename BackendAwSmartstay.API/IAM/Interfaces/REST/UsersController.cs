@@ -279,4 +279,41 @@ public class UsersController(
             return BadRequest(new { message = "An unexpected error occurred while processing your request." });
         }
     }
+
+    /// <summary>
+    ///     Activates a previously deactivated user account (reverse soft delete).
+    /// </summary>
+    [HttpPost("{id}/activate")]
+    [Authorize(UserRoles.Admin, UserRoles.ChainAdmin)]
+    [SwaggerOperation(Summary = "Activate a user", Description = "Reactivates a soft-deleted user if the actor has scope access and hierarchical superiority.", OperationId = "ActivateUser")]
+    [SwaggerResponse(StatusCodes.Status200OK, "User activated successfully")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Unexpected error")]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "Missing or invalid JWT Token")]
+    [SwaggerResponse(StatusCodes.Status403Forbidden, "User does not have required permissions to activate the target")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "User not found")]
+    public async Task<IActionResult> ActivateUser(int id)
+    {
+        var actor = (User?)HttpContext.Items["User"];
+        if (actor == null) return Unauthorized(new { message = "Authentication context is missing or invalid." });
+
+        var command = new ActivateUserCommand(actor.Id, id);
+
+        try
+        {
+            await userCommandService.Handle(command);
+            return Ok(new { message = "User activated successfully" });
+        }
+        catch (UserNotFoundException e)
+        {
+            return NotFound(new { message = e.Message });
+        }
+        catch (UnauthorizedOperationException e)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { message = e.Message });
+        }
+        catch (Exception)
+        {
+            return BadRequest(new { message = "An unexpected error occurred while processing your request." });
+        }
+    }
 }

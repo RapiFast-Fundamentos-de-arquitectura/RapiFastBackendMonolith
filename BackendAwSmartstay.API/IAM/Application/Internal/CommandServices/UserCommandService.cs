@@ -104,7 +104,7 @@ public class UserCommandService(
     }
 
     // ═══════════════════════════════════════════════════════════
-    // New management commands (Day 6)
+    // New management commands
     // ═══════════════════════════════════════════════════════════
 
     /// <summary>
@@ -246,6 +246,23 @@ public class UserCommandService(
 
         target.Deactivate();
         target.IncrementTokenVersion();
+        await unitOfWork.CompleteAsync();
+    }
+
+    /// <summary>
+    ///     Activates a previously deactivated user account (reverse soft delete).
+    ///     Actor must have hierarchy superiority and scope access over the target.
+    /// </summary>
+    public async Task Handle(ActivateUserCommand command)
+    {
+        var actor = await ResolveActorAsync(command.ActorUserId);
+        var target = await ResolveTargetAsync(command.TargetUserId);
+
+        if (!roleAuthorizationService.CanManage(actor, target))
+            throw new UnauthorizedOperationException(
+                $"User {actor.Id} cannot activate user {target.Id}.");
+
+        target.Activate();
         await unitOfWork.CompleteAsync();
     }
 

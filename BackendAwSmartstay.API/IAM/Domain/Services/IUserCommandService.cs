@@ -58,4 +58,9 @@ public interface IUserCommandService
     ///     Handle deactivate user command — performs soft delete.
     /// </summary>
     Task Handle(DeactivateUserCommand command);
+
+    /// <summary>
+    ///     Handle activate user command — reverses a soft delete.
+    /// </summary>
+    Task Handle(ActivateUserCommand command);
 }
