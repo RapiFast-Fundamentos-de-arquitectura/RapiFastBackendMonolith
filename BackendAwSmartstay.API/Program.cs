@@ -40,7 +40,7 @@ builder.AddIamContextServices();
 builder.AddProfilesContextServices();
 builder.AddAnalyticsContextServices();
 
-// Mediator
+// Mediator for Services
 builder.AddCortexMediatorServices();
 
 // New implementation - Health Checks
