@@ -71,7 +71,7 @@ builder.Services.AddRateLimiter(options =>
     
 var app = builder.Build();
 
-// --- Bloque de Inicialización y Migraciones Seguras ---
+// --- Bloque de Inicialización y Migraciones Seguras just for developer ---
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
