@@ -99,7 +99,7 @@ using (var scope = app.Services.CreateScope())
 app.UseOpenApiConfiguration();
 // for adding allowFroent
 app.UseCors("AllowFrontend");
-
+// user httpRedirection
 app.UseHttpsRedirection();
 
 app.UseRateLimiter();
