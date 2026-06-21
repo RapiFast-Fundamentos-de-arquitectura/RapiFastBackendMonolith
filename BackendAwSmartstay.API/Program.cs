@@ -31,15 +31,7 @@ builder.AddOpenApiConfigurationServices();
 // CORS
 builder.AddCorsServices();
 
-// DI / Contextos
-builder.AddSharedContextServices();
-builder.AddAccommodationsContextServices();
-builder.AddBookingsContextServices();
-builder.AddPaymentsContextServices();
-builder.AddIamContextServices();
-builder.AddProfilesContextServices();
-builder.AddAnalyticsContextServices();
-
+ 
 // Mediator for Services
 builder.AddCortexMediatorServices();
 
